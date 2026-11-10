@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import carImg from '../assets/car.png'
+import Swal from 'sweetalert2'
 
 export default function Car() {
   const navigate = useNavigate()
@@ -25,8 +26,38 @@ export default function Car() {
       const perMonth = totalPay / months
 
       setMonthlyInstallment(perMonth.toFixed(2))
+
+      // แสดง SweetAlert2 เมื่อคำนวณสำเร็จ
+      let timerInterval;
+      Swal.fire({
+        title: "คำนวณสำเร็จ!",
+        html: "กำลังประมวลผลใน <b></b> มิลลิวินาที",
+        timer: 2000,
+        timerProgressBar: true,
+        didOpen: () => {
+          Swal.showLoading();
+          const timer = Swal.getPopup().querySelector("b");
+          timerInterval = setInterval(() => {
+            timer.textContent = `${Swal.getTimerLeft()}`;
+          }, 100);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        }
+      }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+          console.log("I was closed by the timer");
+        }
+      });
+
     } else {
-      alert('กรุณากรอกราคารถและอัตราดอกเบี้ยให้ถูกต้อง')
+      // แจ้งเตือนเมื่อกรอกข้อมูลไม่ถูกต้อง
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'กรุณากรอกราคารถและอัตราดอกเบี้ยให้ถูกต้อง',
+        confirmButtonText: 'ตกลง'
+      })
     }
   }
 
@@ -40,50 +71,59 @@ export default function Car() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f9fa', padding: '40px 20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ minHeight: '100vh', background: '#f8f9fa', padding: '40px 20px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: "'Kanit', sans-serif" }}>
       <div style={{ background: '#fff', padding: '40px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', width: '450px', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '4px' }}>Car Installment Calculator</h2>
-        <p style={{ color: '#666', fontSize: '13px', marginBottom: '20px' }}>คำนวณ Car Installment</p>
-        
+        <h2 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '4px', fontFamily: "'Kanit', sans-serif" }}>Car Installment Calculator</h2>
+        <p style={{ color: '#666', fontSize: '13px', marginBottom: '20px', fontFamily: "'Kanit', sans-serif" }}>คำนวณ Car Installment</p>
+
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-          <img src={carImg} alt="Car" style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
+          <img src={carImg} alt="Car" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
         </div>
 
-        <div style={{ textAlign: 'left', marginBottom: '12px' }}>
-          <input 
-            type="text" 
-            placeholder="ชื่อผู้คำนวณ" 
+        {/* ชื่อผู้คำนวณ */}
+        <div style={{ textAlign: 'left', marginBottom: '15px' }}>
+          <label style={{ fontSize: '12px', color: '#333', display: 'block', marginBottom: '5px', fontFamily: "'Kanit', sans-serif" }}>ชื่อผู้คำนวณ</label>
+          <input
+            type="text"
+            placeholder="ชื่อผู้คำนวณ"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px', boxSizing: 'border-box' }} 
-          />
-        </div>
-        <div style={{ textAlign: 'left', marginBottom: '12px' }}>
-          <input 
-            type="number" 
-            placeholder="ราคารถ (บาท)" 
-            value={carPrice}
-            onChange={(e) => setCarPrice(e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px', boxSizing: 'border-box' }} 
-          />
-        </div>
-        <div style={{ textAlign: 'left', marginBottom: '12px' }}>
-          <input 
-            type="number" 
-            placeholder="ดอกเบี้ยต่อปี (%)" 
-            value={interestRate}
-            onChange={(e) => setInterestRate(e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px', boxSizing: 'border-box' }} 
+            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px', boxSizing: 'border-box', fontFamily: "'Kanit', sans-serif" }}
           />
         </div>
 
-        <div style={{ textAlign: 'left', marginBottom: '12px', fontSize: '13px', color: '#555' }}>
-          เงินดาวน์ (%): <br />
+        {/* ราคารถ */}
+        <div style={{ textAlign: 'left', marginBottom: '15px' }}>
+          <label style={{ fontSize: '12px', color: '#333', display: 'block', marginBottom: '5px', fontFamily: "'Kanit', sans-serif" }}>ราคารถ (บาท)</label>
+          <input
+            type="number"
+            placeholder="ราคารถ"
+            value={carPrice}
+            onChange={(e) => setCarPrice(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px', boxSizing: 'border-box', fontFamily: "'Kanit', sans-serif" }}
+          />
+        </div>
+
+        {/* ดอกเบี้ยต่อปี */}
+        <div style={{ textAlign: 'left', marginBottom: '15px' }}>
+          <label style={{ fontSize: '12px', color: '#333', display: 'block', marginBottom: '5px', fontFamily: "'Kanit', sans-serif" }}>อัตราดอกเบี้ยต่อปี (%)</label>
+          <input
+            type="number"
+            placeholder="ดอกเบี้ยต่อปี"
+            value={interestRate}
+            onChange={(e) => setInterestRate(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px', boxSizing: 'border-box', fontFamily: "'Kanit', sans-serif" }}
+          />
+        </div>
+
+        {/* เงินดาวน์ */}
+        <div style={{ textAlign: 'left', marginBottom: '15px', fontSize: '13px', color: '#333', fontFamily: "'Kanit', sans-serif" }}>
+          <label style={{ fontSize: '12px', color: '#333', display: 'block', marginBottom: '5px', fontFamily: "'Kanit', sans-serif" }}>เงินดาวน์ (%)</label>
           {[15, 20, 25, 30, 35].map((p) => (
-            <label key={p} style={{ marginRight: '10px', cursor: 'pointer' }}>
-              <input 
-                type="radio" 
-                name="down" 
+            <label key={p} style={{ marginRight: '10px', cursor: 'pointer', fontSize: '13px', fontFamily: "'Kanit', sans-serif" }}>
+              <input
+                type="radio"
+                name="down"
                 value={p}
                 checked={downPercent === p}
                 onChange={() => setDownPercent(p)}
@@ -92,12 +132,13 @@ export default function Car() {
           ))}
         </div>
 
+        {/* จำนวนเดือนที่ผ่อน */}
         <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-          <label style={{ fontSize: '12px', color: '#333', display: 'block', marginBottom: '5px' }}>จำนวนเดือนที่ผ่อน</label>
-          <select 
+          <label style={{ fontSize: '12px', color: '#333', display: 'block', marginBottom: '5px', fontFamily: "'Kanit', sans-serif" }}>จำนวนเดือนที่ผ่อน</label>
+          <select
             value={months}
             onChange={(e) => setMonths(parseInt(e.target.value))}
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '14px', boxSizing: 'border-box', fontFamily: "'Kanit', sans-serif" }}
           >
             <option value={24}>24 เดือน</option>
             <option value={36}>36 เดือน</option>
@@ -108,28 +149,31 @@ export default function Car() {
           </select>
         </div>
 
+        {/* ปุ่มคำนวณและล้างข้อมูล */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          <button 
+          <button
             onClick={handleCalculate}
-            style={{ flex: 1, background: '#2563eb', color: '#fff', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+            style={{ flex: 1, background: '#2563eb', color: '#fff', border: 'none', padding: '12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontFamily: "'Kanit', sans-serif" }}
           >
             คำนวณ
           </button>
-          <button 
+          <button
             onClick={handleReset}
-            style={{ flex: 1, background: '#d1d5db', color: '#333', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+            style={{ flex: 1, background: '#f3f4f6', color: '#333', border: 'none', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontFamily: "'Kanit', sans-serif" }}
           >
             ล้างข้อมูล
           </button>
         </div>
 
-        <div style={{ fontSize: '13px', color: '#333', marginBottom: '20px' }}>
+        {/* ผลลัพธ์ */}
+        <div style={{ fontSize: '13px', color: '#333', marginBottom: '20px', fontFamily: "'Kanit', sans-serif" }}>
           ผ่อนชำระต่อเดือน: <span style={{ color: '#2563eb', fontWeight: 'bold' }}>{monthlyInstallment} บาท</span>
         </div>
 
-        <button 
+        {/* ปุ่มกลับหน้าหลัก */}
+        <button
           onClick={() => navigate('/')}
-          style={{ width: '100%', background: '#e5e7eb', color: '#333', border: 'none', padding: '10px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px' }}
+          style={{ width: '100%', background: '#e5e7eb', color: '#333', border: 'none', padding: '10px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontFamily: "'Kanit', sans-serif" }}
         >
           กลับหน้าหลัก
         </button>
